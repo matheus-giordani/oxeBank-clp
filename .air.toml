@@ -1,0 +1,28 @@
+# .air.toml
+
+# Configurações do Air
+root = "."
+tmp_dir = "tmp"  # Diretório temporário
+
+# Comandos para executar
+[color]
+# Customize each part's color. If no color found, use the raw app log.
+main = "magenta"
+watcher = "cyan"
+build = "yellow"
+runner = "green"
+
+[build]
+  binary = "main"  # Nome do arquivo binário
+  cmd = "go build -o ./tmp/main ."
+  include_ext = ["go"]
+  exclude_dir = ["assets", "vendor"]  # Diretórios a serem ignorados
+  
+
+[watch]
+  root = "."
+  include_dir = ["."]
+  exclude_dir = ["tmp", "vendor", "assets"]
+
+
+

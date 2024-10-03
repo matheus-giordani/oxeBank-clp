@@ -1,14 +1,13 @@
 package database
 
-
 import (
+	"app/models"
 	"database/sql"
 	"log"
-	// "fmt"
-	"app/models"
-	"github.com/go-gorp/gorp"
-	_ "github.com/lib/pq"	
 
+	// "fmt"
+	"github.com/go-gorp/gorp"
+	_ "github.com/lib/pq"
 )
 
 
@@ -29,11 +28,45 @@ func InitDb() *gorp.DbMap {
     log.Println("Conexão com o banco de dados estabelecida com sucesso!")
 
     dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+
+    // Mapeamento das tabelas com as relações
     dbmap.AddTableWithName(models.Customer{}, "customers").SetKeys(true, "ID")
+    dbmap.AddTableWithName(models.Role{}, "roles").SetKeys(true, "ID")
+    dbmap.AddTableWithName(models.Permission{}, "permissions").SetKeys(true, "ID")
+    
 
     if err = dbmap.CreateTablesIfNotExists(); err != nil {
         log.Fatal("Failed to create tables", err)
     }
+    
+    // Garantindo que as chaves estrangeiras sejam aplicadas
+    _, err = db.Exec(`
+BEGIN;
+
+
+ALTER TABLE IF EXISTS public.customers
+    ADD FOREIGN KEY ("roleId")
+    REFERENCES public.roles (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.roles
+    ADD FOREIGN KEY ("permissionId")
+    REFERENCES public.permissions (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+END;
+    `)
+
+    if err != nil {
+        log.Fatal("Erro ao criar as chaves estrangeiras:", err)
+    }
+
+   
 	
 
     DbMap = dbmap

@@ -15,7 +15,7 @@ services:
       - postgresql-network
     restart: always
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 123
@@ -35,5 +35,23 @@ services:
       - "8080:8080"
     volumes:
       - .:/app
-    command: go run main.go
+    restart: always
+    command: air -c .air.toml
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    networks:
+      - postgresql-network
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=matheus.giordanioliveira@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=senha
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - 4000:80
+    links:
+      - postgresql
     
+
+volumes:
+  pgadmin_data:
+  postgres_data:
